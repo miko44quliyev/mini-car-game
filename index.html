@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HyperDrive Pro // Vector Engine</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div id="game-container">
+    <canvas id="gameCanvas" width="480" height="720"></canvas>
+    
+    <div id="ui-layer">
+      
+      <div id="hud" class="hidden">
+        <div class="hud-box">
+          <span class="label">SCORE</span>
+          <span id="score-display">00000</span>
+        </div>
+        <div class="hud-box">
+          <span class="label">TARGET BEST</span>
+          <span id="hud-best-display">00000</span>
+        </div>
+        <button id="hud-pause-btn" class="hud-pause-action" type="button">⏸</button>
+      </div>
+
+      <div id="live-alert" class="live-alert-banner hidden">NEW RECORD!</div>
+
+      <div id="start-screen" class="overlay-card">
+        <h1 class="title-logo">HYPER<span class="accent">DRIVE</span><span class="version">PRO</span></h1>
+        <p class="tagline">Procedural High-Speed Traffic Simulation</p>
+        
+        <div class="stats-panel">
+          <div class="stat-row">
+            <span>ALL-TIME HIGH RECORD:</span>
+            <span id="menu-high-score" class="highlight">0</span>
+          </div>
+        </div>
+
+        <div class="mode-selector-zone">
+          <h3>SELECT TRANSMISSION MODE</h3>
+          <div class="mode-toggle-container menu-toggle-target"></div>
+        </div>
+
+        <div class="controls-guide">
+          <h3>SYSTEM CONTROLS</h3>
+          <div class="keys-row">
+            <span class="key">A</span> / <span class="key">←</span> Left 
+            <span class="key">D</span> / <span class="key">→</span> Right
+            <span class="key">ESC</span> Pause
+          </div>
+        </div>
+
+        <button id="start-btn" class="cta-button" type="button">ENGAGE ENGINE</button>
+      </div>
+
+      <div id="pause-screen" class="overlay-card hidden">
+        <h2 class="pause-title">ENGINE PAUSED</h2>
+        <p class="summary-text">Simulation state holds stable. Choose operational override routine:</p>
+
+        <div class="pause-action-stack">
+          <button id="pause-continue-btn" class="cta-button" type="button">CONTINUE SIMULATION</button>
+          <button id="pause-restart-btn" class="cta-button secondary" type="button">RESTART RUN</button>
+          <button id="pause-exit-btn" class="cta-button danger-link" type="button">RETURN TO MAIN MENU</button>
+        </div>
+      </div>
+
+      <div id="game-over-screen" class="overlay-card hidden">
+        <h2 class="game-over-title">CRITICAL FAILURE</h2>
+        <p id="crash-feedback-msg" class="summary-text">Impact vectors exceeded structural frame resilience limits.</p>
+
+        <div class="stats-panel">
+          <div class="stat-row">
+            <span>FINAL SIMULATION SCORE:</span>
+            <span id="final-score" class="highlight">0</span>
+          </div>
+          <div class="stat-row" id="new-record-tag" style="display: none;">
+            <span class="badge">SYSTEM RECORD BROKEN!</span>
+          </div>
+        </div>
+
+        <div class="mode-selector-zone">
+          <h3>RECONFIGURE TRANSMISSION MODE</h3>
+          <div class="mode-toggle-container game-over-toggle-target"></div>
+        </div>
+
+        <button id="restart-btn" class="cta-button" type="button">REDEPLOY SIMULATION</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="game.js"></script>
+</body>
+</html>
