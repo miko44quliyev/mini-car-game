@@ -2,94 +2,133 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HyperDrive Pro // Vector Engine</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HyperDrive Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
   <div id="game-container">
     <canvas id="gameCanvas" width="480" height="720"></canvas>
-    
+
     <div id="ui-layer">
-      
+
+      <!-- HUD -->
       <div id="hud" class="hidden">
         <div class="hud-box">
           <span class="label">SCORE</span>
           <span id="score-display">00000</span>
         </div>
+        <div class="hud-center">
+          <div id="nitro-bar-wrap">
+            <div class="nitro-label">NITRO</div>
+            <div class="nitro-track">
+              <div id="nitro-bar"></div>
+            </div>
+          </div>
+          <div id="combo-display" class="hidden">
+            <span id="combo-text">x1</span>
+            <span class="combo-label">COMBO</span>
+          </div>
+        </div>
         <div class="hud-box">
-          <span class="label">TARGET BEST</span>
+          <span class="label">BEST</span>
           <span id="hud-best-display">00000</span>
         </div>
         <button id="hud-pause-btn" class="hud-pause-action" type="button">⏸</button>
       </div>
 
-      <div id="live-alert" class="live-alert-banner hidden">NEW RECORD!</div>
+      <!-- Near miss flash -->
+      <div id="near-miss-banner" class="hidden near-miss-banner">NEAR MISS! +<span id="near-miss-pts"></span></div>
 
+      <!-- Live record alert -->
+      <div id="live-alert" class="live-alert-banner hidden">🏆 NEW RECORD!</div>
+
+      <!-- START SCREEN -->
       <div id="start-screen" class="overlay-card">
-        <h1 class="title-logo">HYPER<span class="accent">DRIVE</span><span class="version">PRO</span></h1>
-        <p class="tagline">Procedural High-Speed Traffic Simulation</p>
-        
+        <div class="logo-wrap">
+          <h1 class="title-logo">HYPER<span class="accent">DRIVE</span></h1>
+          <span class="version-badge">PRO</span>
+        </div>
+        <p class="tagline">High-Speed Traffic Simulation</p>
+
         <div class="stats-panel">
           <div class="stat-row">
-            <span>ALL-TIME HIGH RECORD:</span>
+            <span>ALL-TIME RECORD</span>
             <span id="menu-high-score" class="highlight">0</span>
           </div>
         </div>
 
-        <div class="mode-selector-zone">
-          <h3>SELECT TRANSMISSION MODE</h3>
-          <div class="mode-toggle-container menu-toggle-target"></div>
+        <div class="section-label">TRANSMISSION MODE</div>
+        <div class="mode-toggle-container menu-toggle-target"></div>
+
+        <div class="section-label" style="margin-top:14px;">DIFFICULTY</div>
+        <div class="difficulty-row">
+          <button class="diff-btn active-diff" data-diff="EASY">EASY</button>
+          <button class="diff-btn" data-diff="NORMAL">NORMAL</button>
+          <button class="diff-btn" data-diff="INSANE">INSANE</button>
         </div>
 
         <div class="controls-guide">
-          <h3>SYSTEM CONTROLS</h3>
           <div class="keys-row">
-            <span class="key">A</span> / <span class="key">←</span> Left 
-            <span class="key">D</span> / <span class="key">→</span> Right
+            <span class="key">A</span><span class="key">←</span> Left &nbsp;
+            <span class="key">D</span><span class="key">→</span> Right &nbsp;
+            <span class="key">SPACE</span> Nitro &nbsp;
             <span class="key">ESC</span> Pause
           </div>
+          <div class="touch-hint">📱 Swipe left/right to steer · Tap right side for Nitro</div>
         </div>
 
         <button id="start-btn" class="cta-button" type="button">ENGAGE ENGINE</button>
       </div>
 
+      <!-- PAUSE SCREEN -->
       <div id="pause-screen" class="overlay-card hidden">
-        <h2 class="pause-title">ENGINE PAUSED</h2>
-        <p class="summary-text">Simulation state holds stable. Choose operational override routine:</p>
-
+        <h2 class="overlay-title accent-text">ENGINE PAUSED</h2>
+        <p class="summary-text">Simulation state holds stable.</p>
         <div class="pause-action-stack">
-          <button id="pause-continue-btn" class="cta-button" type="button">CONTINUE SIMULATION</button>
-          <button id="pause-restart-btn" class="cta-button secondary" type="button">RESTART RUN</button>
-          <button id="pause-exit-btn" class="cta-button danger-link" type="button">RETURN TO MAIN MENU</button>
+          <button id="pause-continue-btn" class="cta-button" type="button">CONTINUE</button>
+          <button id="pause-restart-btn" class="cta-button secondary" type="button">RESTART</button>
+          <button id="pause-exit-btn" class="cta-button danger-link" type="button">MAIN MENU</button>
         </div>
       </div>
 
+      <!-- GAME OVER SCREEN -->
       <div id="game-over-screen" class="overlay-card hidden">
-        <h2 class="game-over-title">CRITICAL FAILURE</h2>
-        <p id="crash-feedback-msg" class="summary-text">Impact vectors exceeded structural frame resilience limits.</p>
+        <h2 class="overlay-title danger-text">CRITICAL FAILURE</h2>
+        <p id="crash-feedback-msg" class="summary-text">Impact vectors exceeded structural limits.</p>
 
         <div class="stats-panel">
           <div class="stat-row">
-            <span>FINAL SIMULATION SCORE:</span>
+            <span>FINAL SCORE</span>
             <span id="final-score" class="highlight">0</span>
           </div>
-          <div class="stat-row" id="new-record-tag" style="display: none;">
-            <span class="badge">SYSTEM RECORD BROKEN!</span>
+          <div class="stat-row">
+            <span>NEAR MISSES</span>
+            <span id="final-near-misses" class="highlight highlight-gold">0</span>
           </div>
+          <div class="stat-row">
+            <span>MAX COMBO</span>
+            <span id="final-max-combo" class="highlight highlight-gold">x0</span>
+          </div>
+          <div id="new-record-tag" class="record-badge hidden">🏆 NEW RECORD!</div>
         </div>
 
-        <div class="mode-selector-zone">
-          <h3>RECONFIGURE TRANSMISSION MODE</h3>
-          <div class="mode-toggle-container game-over-toggle-target"></div>
-        </div>
+        <div class="section-label">TRANSMISSION MODE</div>
+        <div class="mode-toggle-container game-over-toggle-target"></div>
 
-        <button id="restart-btn" class="cta-button" type="button">REDEPLOY SIMULATION</button>
+        <button id="restart-btn" class="cta-button" type="button">REDEPLOY</button>
       </div>
 
     </div>
   </div>
+
+  <!-- Touch controls overlay (mobile) -->
+  <div id="touch-zone-left" class="touch-zone"></div>
+  <div id="touch-zone-right" class="touch-zone"></div>
 
   <script src="game.js"></script>
 </body>
