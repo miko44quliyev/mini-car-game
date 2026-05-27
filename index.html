@@ -11,125 +11,176 @@
 </head>
 <body>
 
-  <div id="game-container">
-    <canvas id="gameCanvas" width="480" height="720"></canvas>
+<div id="game-container">
+  <canvas id="gameCanvas" width="480" height="720"></canvas>
 
-    <div id="ui-layer">
+  <div id="ui-layer">
 
-      <!-- HUD -->
-      <div id="hud" class="hidden">
-        <div class="hud-box">
-          <span class="label">SCORE</span>
-          <span id="score-display">00000</span>
+    <!-- ── HUD ── -->
+    <div id="hud" class="hidden">
+      <div class="hud-box">
+        <span class="label">SCORE</span>
+        <span id="score-display">00000</span>
+      </div>
+      <div class="hud-center">
+        <div id="nitro-bar-wrap">
+          <div class="nitro-label">NITRO</div>
+          <div class="nitro-track"><div id="nitro-bar"></div></div>
         </div>
-        <div class="hud-center">
-          <div id="nitro-bar-wrap">
-            <div class="nitro-label">NITRO</div>
-            <div class="nitro-track">
-              <div id="nitro-bar"></div>
-            </div>
-          </div>
-          <div id="combo-display" class="hidden">
-            <span id="combo-text">x1</span>
-            <span class="combo-label">COMBO</span>
-          </div>
+        <div id="combo-display" class="hidden">
+          <span id="combo-text">x1</span>
+          <span class="combo-label">COMBO</span>
         </div>
-        <div class="hud-box">
-          <span class="label">BEST</span>
-          <span id="hud-best-display">00000</span>
-        </div>
-        <button id="hud-pause-btn" class="hud-pause-action" type="button">⏸</button>
+      </div>
+      <div class="hud-box">
+        <span class="label">BEST</span>
+        <span id="hud-best-display">00000</span>
+      </div>
+      <button id="hud-pause-btn" class="hud-pause-action" type="button">⏸</button>
+    </div>
+
+    <!-- Banners -->
+    <div id="near-miss-banner" class="hidden near-miss-banner">NEAR MISS! +<span id="near-miss-pts"></span></div>
+    <div id="live-alert" class="live-alert-banner hidden">🏆 NEW RECORD!</div>
+
+    <!-- ══════════════════════════════════════════════════════
+         START SCREEN
+    ══════════════════════════════════════════════════════ -->
+    <div id="start-screen" class="overlay-card">
+      <div class="logo-wrap">
+        <h1 class="title-logo">HYPER<span class="accent">DRIVE</span></h1>
+        <span class="version-badge">PRO</span>
+      </div>
+      <p class="tagline">High-Speed Traffic Simulation</p>
+
+      <div class="wallet-row">
+        <span class="wallet-icon">🪙</span>
+        <span id="menu-wallet" class="wallet-amount">0</span>
+        <span class="wallet-label">COINS</span>
       </div>
 
-      <!-- Near miss flash -->
-      <div id="near-miss-banner" class="hidden near-miss-banner">NEAR MISS! +<span id="near-miss-pts"></span></div>
-
-      <!-- Live record alert -->
-      <div id="live-alert" class="live-alert-banner hidden">🏆 NEW RECORD!</div>
-
-      <!-- START SCREEN -->
-      <div id="start-screen" class="overlay-card">
-        <div class="logo-wrap">
-          <h1 class="title-logo">HYPER<span class="accent">DRIVE</span></h1>
-          <span class="version-badge">PRO</span>
+      <div class="stats-panel">
+        <div class="stat-row">
+          <span>ALL-TIME RECORD</span>
+          <span id="menu-high-score" class="highlight">0</span>
         </div>
-        <p class="tagline">High-Speed Traffic Simulation</p>
+      </div>
 
-        <div class="stats-panel">
-          <div class="stat-row">
-            <span>ALL-TIME RECORD</span>
-            <span id="menu-high-score" class="highlight">0</span>
-          </div>
+      <div class="section-label">TRANSMISSION MODE</div>
+      <div class="mode-toggle-container menu-toggle-target"></div>
+
+      <div class="section-label" style="margin-top:12px;">DIFFICULTY</div>
+      <div class="difficulty-row">
+        <button class="diff-btn" data-diff="EASY">EASY</button>
+        <button class="diff-btn active-diff" data-diff="NORMAL">NORMAL</button>
+        <button class="diff-btn" data-diff="INSANE">INSANE</button>
+      </div>
+
+      <div class="controls-guide">
+        <div class="keys-row">
+          <span class="key">A</span><span class="key">←</span> Left &nbsp;
+          <span class="key">D</span><span class="key">→</span> Right &nbsp;
+          <span class="key">SPC</span> Nitro &nbsp;
+          <span class="key">ESC</span> Pause
         </div>
+      </div>
 
-        <div class="section-label">TRANSMISSION MODE</div>
-        <div class="mode-toggle-container menu-toggle-target"></div>
-
-        <div class="section-label" style="margin-top:14px;">DIFFICULTY</div>
-        <div class="difficulty-row">
-          <button class="diff-btn active-diff" data-diff="EASY">EASY</button>
-          <button class="diff-btn" data-diff="NORMAL">NORMAL</button>
-          <button class="diff-btn" data-diff="INSANE">INSANE</button>
-        </div>
-
-        <div class="controls-guide">
-          <div class="keys-row">
-            <span class="key">A</span><span class="key">←</span> Left &nbsp;
-            <span class="key">D</span><span class="key">→</span> Right &nbsp;
-            <span class="key">SPACE</span> Nitro &nbsp;
-            <span class="key">ESC</span> Pause
-          </div>
-          <div class="touch-hint">📱 Swipe left/right to steer · Tap right side for Nitro</div>
-        </div>
-
+      <div class="btn-row">
+        <button id="garage-open-btn" class="cta-button secondary icon-btn" type="button">🚗 GARAGE</button>
         <button id="start-btn" class="cta-button" type="button">ENGAGE ENGINE</button>
       </div>
+    </div>
 
-      <!-- PAUSE SCREEN -->
-      <div id="pause-screen" class="overlay-card hidden">
-        <h2 class="overlay-title accent-text">ENGINE PAUSED</h2>
-        <p class="summary-text">Simulation state holds stable.</p>
-        <div class="pause-action-stack">
-          <button id="pause-continue-btn" class="cta-button" type="button">CONTINUE</button>
-          <button id="pause-restart-btn" class="cta-button secondary" type="button">RESTART</button>
-          <button id="pause-exit-btn" class="cta-button danger-link" type="button">MAIN MENU</button>
+    <!-- ══════════════════════════════════════════════════════
+         GARAGE SCREEN
+    ══════════════════════════════════════════════════════ -->
+    <div id="garage-screen" class="overlay-card hidden">
+      <div class="garage-header">
+        <h2 class="overlay-title">🚗 GARAGE</h2>
+        <div class="wallet-row compact">
+          <span class="wallet-icon">🪙</span>
+          <span id="garage-wallet" class="wallet-amount">0</span>
         </div>
       </div>
 
-      <!-- GAME OVER SCREEN -->
-      <div id="game-over-screen" class="overlay-card hidden">
-        <h2 class="overlay-title danger-text">CRITICAL FAILURE</h2>
-        <p id="crash-feedback-msg" class="summary-text">Impact vectors exceeded structural limits.</p>
-
-        <div class="stats-panel">
-          <div class="stat-row">
-            <span>FINAL SCORE</span>
-            <span id="final-score" class="highlight">0</span>
-          </div>
-          <div class="stat-row">
-            <span>NEAR MISSES</span>
-            <span id="final-near-misses" class="highlight highlight-gold">0</span>
-          </div>
-          <div class="stat-row">
-            <span>MAX COMBO</span>
-            <span id="final-max-combo" class="highlight highlight-gold">x0</span>
-          </div>
-          <div id="new-record-tag" class="record-badge hidden">🏆 NEW RECORD!</div>
+      <!-- Car strip -->
+      <div class="garage-viewport">
+        <button id="garage-prev" class="garage-nav" type="button">‹</button>
+        <div class="garage-strip">
+          <div id="garage-track"></div>
         </div>
+        <button id="garage-next" class="garage-nav" type="button">›</button>
+      </div>
 
-        <div class="section-label">TRANSMISSION MODE</div>
-        <div class="mode-toggle-container game-over-toggle-target"></div>
+      <!-- Car info panel -->
+      <div class="car-info-panel">
+        <div class="car-info-top">
+          <span id="car-info-name" class="car-name">City Cruiser</span>
+          <span id="car-info-desc" class="car-tier-label">Tier D · Starter</span>
+        </div>
+        <div id="car-info-stats" class="car-stats"></div>
+        <div id="car-price-row" class="car-price-row"></div>
+        <button id="car-action-btn" class="car-action-btn" type="button">SELECT</button>
+      </div>
 
+      <button id="garage-close-btn" class="cta-button secondary" type="button" style="margin-top:10px;">← BACK</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         PAUSE SCREEN
+    ══════════════════════════════════════════════════════ -->
+    <div id="pause-screen" class="overlay-card hidden">
+      <h2 class="overlay-title accent-text">ENGINE PAUSED</h2>
+      <p class="summary-text">Simulation state holds stable.</p>
+      <div class="pause-action-stack">
+        <button id="pause-continue-btn" class="cta-button" type="button">CONTINUE</button>
+        <button id="pause-restart-btn" class="cta-button secondary" type="button">RESTART</button>
+        <button id="pause-exit-btn" class="cta-button danger-link" type="button">MAIN MENU</button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         GAME OVER SCREEN
+    ══════════════════════════════════════════════════════ -->
+    <div id="game-over-screen" class="overlay-card hidden">
+      <h2 class="overlay-title danger-text">CRITICAL FAILURE</h2>
+      <p id="crash-feedback-msg" class="summary-text">Impact vectors exceeded structural limits.</p>
+
+      <div class="stats-panel">
+        <div class="stat-row">
+          <span>FINAL SCORE</span>
+          <span id="final-score" class="highlight">0</span>
+        </div>
+        <div class="stat-row">
+          <span>COINS EARNED</span>
+          <span id="final-coins-earned" class="highlight highlight-gold">+0 🪙</span>
+        </div>
+        <div class="stat-row">
+          <span>NEAR MISSES</span>
+          <span id="final-near-misses" class="highlight highlight-gold">0</span>
+        </div>
+        <div class="stat-row">
+          <span>MAX COMBO</span>
+          <span id="final-max-combo" class="highlight highlight-gold">x0</span>
+        </div>
+        <div id="new-record-tag" class="record-badge hidden">🏆 NEW RECORD!</div>
+      </div>
+
+      <!-- Milestone rewards box -->
+      <div id="milestone-rewards" class="milestone-box hidden"></div>
+
+      <div class="section-label">TRANSMISSION MODE</div>
+      <div class="mode-toggle-container game-over-toggle-target"></div>
+
+      <div class="btn-row" style="margin-top:12px;">
+        <button id="gameover-menu-btn" class="cta-button secondary icon-btn" type="button">⬅ MENU</button>
         <button id="restart-btn" class="cta-button" type="button">REDEPLOY</button>
       </div>
-
     </div>
-  </div>
 
-  <!-- Touch controls overlay (mobile) -->
-  <div id="touch-zone-left" class="touch-zone"></div>
-  <div id="touch-zone-right" class="touch-zone"></div>
-
-  <script src="game.js"></script>
+  </div><!-- /ui-layer -->
+</div><!-- /game-container -->
+<script src="cars.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
