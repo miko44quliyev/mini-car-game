@@ -50,7 +50,7 @@ The game works completely offline — open the HTML file directly in a browser, 
 
 ## Excalidraw Sketch
 
-> *(Paste your Excalidraw export image here)*
+> ![alt text](car-game.png)
 
 ```
 ┌──────────────────────────────────────┐
