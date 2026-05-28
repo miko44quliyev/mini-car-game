@@ -187,19 +187,19 @@ function initDiffButtons() {
 // ═══════════════════════════════════════════════════════════════════════════
 let garageIndex = 0;
 
-garageOpenBtn.addEventListener('click', () => {
+garageOpenBtn.addEventListener('click', () => { SFX.boot(); SFX.menuClick();
   startScreen.classList.add('hidden');
   garageScreen.classList.remove('hidden');
   buildGarage();
   refreshWallet();
 });
-garageCloseBtn.addEventListener('click', () => {
+garageCloseBtn.addEventListener('click', () => { SFX.menuClick();
   garageScreen.classList.add('hidden');
   startScreen.classList.remove('hidden');
   refreshWallet();
 });
-garagePrev.addEventListener('click', () => selectGarageIndex(garageIndex - 1));
-garageNext.addEventListener('click', () => selectGarageIndex(garageIndex + 1));
+garagePrev.addEventListener('click', () => { SFX.menuClick(); selectGarageIndex(garageIndex - 1); });
+garageNext.addEventListener('click', () => { SFX.menuClick(); selectGarageIndex(garageIndex + 1); });
 
 function buildGarage() {
   garageTrack.innerHTML = '';
@@ -296,23 +296,13 @@ function updateCarInfoBox() {
     carActionBtn.textContent = 'SELECT';
     carActionBtn.className   = 'car-action-btn';
     carActionBtn.disabled    = false;
-    carActionBtn.onclick     = () => {
-      selectedCarId = car.id;
-      saveEconomy();
-      buildGarage();
-    };
+    carActionBtn.onclick     = () => { SFX.coin(); selectedCarId = car.id; saveEconomy(); buildGarage(); };
   } else {
     const canAfford = wallet >= car.price;
     carActionBtn.textContent = canAfford ? `BUY — 🪙 ${car.price.toLocaleString()}` : '🔒 LOCKED';
     carActionBtn.className   = canAfford ? 'car-action-btn buy-btn' : 'car-action-btn locked-btn';
     carActionBtn.disabled    = !canAfford;
-    carActionBtn.onclick     = canAfford ? () => {
-      wallet -= car.price;
-      ownedCarIds.push(car.id);
-      saveEconomy();
-      refreshWallet();
-      buildGarage();
-    } : null;
+    carActionBtn.onclick     = canAfford ? () => { SFX.coin(); SFX.coin(); wallet -= car.price; ownedCarIds.push(car.id); saveEconomy(); refreshWallet(); buildGarage(); } : null;
   }
 }
 
@@ -356,13 +346,13 @@ function checkMilestones(finalScore) {
 // ═══════════════════════════════════════════════════════════════════════════
 // GAME LIFECYCLE
 // ═══════════════════════════════════════════════════════════════════════════
-startBtn.addEventListener('click', startGame);
-restartBtn.addEventListener('click', startGame);
-gameoverMenuBtn.addEventListener('click', exitToMenu);
-hudPauseBtn.addEventListener('click', togglePause);
-pauseContinueBtn.addEventListener('click', togglePause);
-pauseRestartBtn.addEventListener('click', startGame);
-pauseExitBtn.addEventListener('click', exitToMenu);
+startBtn.addEventListener('click', () => { SFX.boot(); SFX.menuClick(); startGame(); });
+restartBtn.addEventListener('click', () => { SFX.boot(); SFX.menuClick(); startGame(); });
+gameoverMenuBtn.addEventListener('click', () => { SFX.menuClick(); exitToMenu(); });
+hudPauseBtn.addEventListener('click', () => { SFX.menuClick(); togglePause(); });
+pauseContinueBtn.addEventListener('click', () => { SFX.menuClick(); togglePause(); });
+pauseRestartBtn.addEventListener('click', () => { SFX.boot(); SFX.menuClick(); startGame(); });
+pauseExitBtn.addEventListener('click', () => { SFX.menuClick(); exitToMenu(); });
 
 window.addEventListener('keydown', e => { keys[e.key] = true; if (e.key === 'Escape') togglePause(); });
 window.addEventListener('keyup',   e => { keys[e.key] = false; });
@@ -405,7 +395,9 @@ function startGame() {
   initTrackLines(); initRoadMarkers(); initRain();
   updateNitroBar();
   comboDisplay.classList.add('hidden');
+
   gameState = 'PLAYING';
+  SFX.startEngine();
 }
 
 function togglePause() {
@@ -414,6 +406,7 @@ function togglePause() {
 }
 
 function exitToMenu() {
+  SFX.stopEngine();
   [pauseScreen, gameOverScreen, hudLayer, liveAlert, nearMissBanner].forEach(s => s.classList.add('hidden'));
   startScreen.classList.remove('hidden');
   gameState = 'MENU';
@@ -421,6 +414,8 @@ function exitToMenu() {
 }
 
 function triggerCrash() {
+  SFX.crash();
+  SFX.stopEngine();
   gameState = 'GAMEOVER';
   [hudLayer, liveAlert, nearMissBanner].forEach(s => s.classList.add('hidden'));
   gameOverScreen.classList.remove('hidden');
@@ -432,12 +427,14 @@ function triggerCrash() {
   runCoins         = calcRunCoins(fs, nearMissCount, maxCombo);
   const totalCoins = runCoins + milestoneC;
   addCoins(totalCoins);
+  setTimeout(() => SFX.coin(), 300);
 
   const key  = storageKey();
   const prev = LS.get(key, 0);
   if (recordBrokenThisRun && fs > prev) {
     LS.set(key, fs);
     newRecordTag.classList.remove('hidden');
+    setTimeout(() => SFX.newRecord(), 500);
     crashFeedbackMsg.innerHTML = `<span style="color:var(--success);font-weight:700;">OUTSTANDING!</span> New record ${fs.toLocaleString()} pts!`;
   } else {
     newRecordTag.classList.add('hidden');
@@ -529,16 +526,20 @@ function update() {
 
   // Nitro
   const nitroKey = keys[' '] || keys['Shift'];
+  const wasNitroBoosting = nitroBoosting;
   if (nitroKey && nitro > 0 && !nitroRecharge) {
     nitroBoosting = true;
     nitro = Math.max(0, nitro - activeRuntime.nitroDrain);
-    if (nitro === 0) { nitroBoosting = false; nitroRecharge = true; }
+    if (nitro === 0) { nitroBoosting = false; nitroRecharge = true; SFX.nitroDepleted(); }
   } else {
     nitroBoosting = false;
     if (nitroRecharge) { nitro = Math.min(nitroMax, nitro + 0.4); if (nitro >= nitroMax*0.3) nitroRecharge = false; }
     else nitro = Math.min(nitroMax, nitro + 0.2);
   }
+  // Edge detect: nitro just activated
+  if (nitroBoosting && !wasNitroBoosting) SFX.nitroActivate();
   updateNitroBar();
+  SFX.tickEngine(gameSpeed, nitroBoosting);
 
   const sm = nitroBoosting ? activeRuntime.nitroMult : 1.0;
   const mm = chosenMode === 'OPPOSITE' ? 1.6 : 1.0;
@@ -552,6 +553,7 @@ function update() {
   if (fs > baselineRecord && !recordBrokenThisRun) {
     recordBrokenThisRun = true;
     liveAlert.classList.remove('hidden');
+    SFX.newRecord();
     recordToastTimer = setTimeout(() => liveAlert.classList.add('hidden'), 3500);
   }
   if (recordBrokenThisRun) hudBestDisplay.textContent = String(fs).padStart(5, '0');
@@ -592,8 +594,10 @@ function update() {
     }
     if (!obs.nearMissed && nearMissBox(obs)) {
       obs.nearMissed = true; nearMissCount++;
+      SFX.nearMiss();
       combo++; if (combo > maxCombo) maxCombo = combo;
       comboTimer = comboDecay;
+      SFX.comboUp(combo);
       const bonus = combo * 15; score += bonus;
       nearMissPts.textContent = bonus;
       nearMissBanner.classList.remove('hidden');

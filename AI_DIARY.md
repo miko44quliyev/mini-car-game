@@ -145,3 +145,34 @@ Also the resulting `game.js` is 860 KB because 20 PNGs in base64 are large. The 
 *Total diary entries: 8*
 *Total estimated time lost to AI errors: ~3.5 hours*
 *Total time saved by using AI: way more than that — the full game would have taken weeks solo.*
+
+---
+
+### Day 9 — Added full audio engine with 10 synthesised sound effects
+
+The game was completely silent. I wanted: engine hum, nitro whoosh, nitro fizzle, near-miss doppler, combo chime, crash explosion, new record fanfare, coin chime, menu click, and countdown beeps — all without any audio files.
+
+Asked Claude to build a Web Audio API `SFX` module and wire it into the existing game.
+
+**The engine hum** uses a sawtooth oscillator running continuously while the game is in PLAYING state. Its frequency maps from 60 Hz (slow) to 220 Hz (max speed) so the engine pitch rises as the road speeds up. A low-pass filter at 400 Hz stops it from sounding harsh, and a slow LFO creates a subtle pulse. It starts on the first countdown beep and stops when you crash or exit to menu.
+
+**Nitro activate** plays a bandpass-swept noise burst (frequency sweeps 300 → 3200 Hz over 0.45s) layered with a pitch surge on the engine oscillator. **Nitro depleted** fires three short low-pass noise sputters with slight time offsets.
+
+**Near-miss** uses a descending sine tone (1100 → dropping) plus a triangle wave descending from 880 → 220 Hz, simulating a doppler effect as the car passes close.
+
+**Combo up** plays 3 ascending triangle wave notes whose base frequency scales with the combo level — so combo ×2 sounds different from ×8.
+
+**Crash** uses distorted low-pass noise (a waveshaper with 300 drive), a sub-bass sine at 60 Hz, and a short high-frequency crack burst.
+
+**New record** plays a 4-note fanfare (C5 E5 G5 C6) with a harmony a fifth below each note. **Coin** is two short sine tones at musical intervals. **Menu click** is a short sine pop + noise transient. **Countdown** is three 440 Hz square beeps then a double 880 Hz "GO!" beep.
+
+Also added a **COUNTDOWN game state** — the game doesn't actually start (input blocked, physics frozen) until all 3 beeps finish. This replaced the instant start, which felt abrupt.
+
+One bug: the engine oscillator was being started before AudioContext was created, because `SFX.startEngine()` was called at the end of `startGame()` but `SFX.boot()` was only called on the button click handlers. If someone called `startGame()` from a restart button that didn't boot first, the oscillator creation would throw `Cannot create OscillatorNode with null context`. Fixed by adding a boot guard inside `startEngine()` itself.
+
+Second bug: `SFX.coin()` was being called twice for a car purchase (intended — buy = two chimes, select = one), but it was also accidentally firing during the milestone reward payout. The milestone payout already had its own `SFX.coin()` call, so coins were playing 3 times at game over. Fixed by removing the duplicate from the milestone path and keeping only the intentional one.
+
+**What I asked:** "Build a Web Audio API sound engine with 10 synthesised sounds and wire them all into the game."
+**What went wrong:** Engine oscillator started before AudioContext boot. Coin sound fired 3× at game over.
+**How I fixed it:** Added boot guard in `startEngine()`. Traced all `SFX.coin()` call sites and removed the duplicate in the milestone path.
+**Time lost:** ~25 minutes

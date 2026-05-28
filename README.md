@@ -50,7 +50,7 @@ The game works completely offline — open the HTML file directly in a browser, 
 
 ## Excalidraw Sketch
 
-> ![alt text](car-game.png)
+> ![car image](car-game.png)
 
 ```
 ┌──────────────────────────────────────┐
@@ -136,6 +136,26 @@ The game is written in a **functional / procedural style** — no classes, no `t
 - If cars had unique behaviour (special abilities, different trail effects, boss logic), a `Car` class with a `render()` method would have been cleaner.
 - A `ParticleSystem` class would have been better than the raw `particles[]` array with scattered push/splice logic.
 
+
+### Web Audio API — zero-file sound engine
+
+All 10 sound effects are **synthesised in real time** using the Web Audio API — no `.mp3` or `.ogg` files, no CDN, no loading time.
+
+| Sound | Technique |
+|---|---|
+| Engine hum | Continuous sawtooth oscillator, frequency maps to `gameSpeed` (60–220 Hz), LFO tremolo for pulse |
+| Nitro activate | Bandpass-swept noise burst (300→3200 Hz) + engine pitch surge |
+| Nitro depleted | 3 low-pass noise sputters with staggered timing |
+| Near miss | Descending sine + triangle tones simulating doppler, short noise whoosh |
+| Combo up | 3-note ascending triangle chime, base pitch scales with combo level |
+| Crash | Distorted waveshaper noise + 60 Hz sub-bass sine + high crack burst |
+| New record | 4-note fanfare (C5 E5 G5 C6) with harmonic fifth layer |
+| Coin | Two short sine tones at a musical interval |
+| Menu click | Sine pop + noise transient |
+| Countdown | Square wave beeps at 440 Hz, double 880 Hz "GO!" |
+
+`SFX.boot()` creates the `AudioContext` on the first user gesture (required by browsers). The engine oscillator runs continuously while playing and its pitch tracks `gameSpeed` every frame via `SFX.tickEngine()`. A `COUNTDOWN` game state freezes physics until the 3 beeps complete before the engine starts.
+
 ### Canvas + HTML overlay
 
 Everything visual except the UI is drawn on a single `<canvas>` element every frame. Buttons, score text, and screens live in an HTML `#ui-layer` div on top of the canvas.
@@ -181,9 +201,8 @@ hd_ms_ms_1000                → boolean
 | 2 | **Traffic cars can stack in the same lane** — the spawn check only tests if the last obstacle's Y > 180, so two cars can appear side-by-side making a lane impossible to dodge. | Medium | Add a per-lane cooldown before spawning into that lane again. |
 | 3 | **Nitro touch zone is fragile on mobile** — right-side touch detection uses a canvas-relative threshold that breaks when the page is zoomed or on wide screens. | Medium | Replace with explicit on-screen arrow and nitro buttons. |
 | 4 | **Game Over screen shows before explosion finishes** — `triggerCrash()` shows the overlay immediately while particles are still playing. | Low | Delay the screen by 400ms to let the explosion animate first. |
-| 5 | **No sound at all** — the game is completely silent. | Medium | Add Web Audio API tones for engine hum, near-miss swoosh, crash boom, and nitro whoosh. |
-| 6 | **Garage doesn't scroll on short screens** — on phones under ~700px tall the bottom of the garage is cut off. | Low | Add `overflow-y: scroll` to the garage panel and reduce card size on mobile. |
-| 7 | **game.js is 860 KB** — most of it is base64 image data. Slow to parse on weak devices. | Medium | Host images separately or use a real spritesheet with canvas `drawImage` clipping instead of base64 per car. |
+| 5 | **Garage doesn't scroll on short screens** — on phones under ~700px tall the bottom of the garage is cut off. | Low | Add `overflow-y: scroll` to the garage panel and reduce card size on mobile. |
+| 6 | **game.js is 860 KB** — most of it is base64 image data. Slow to parse on weak devices. | Medium | Host images separately or use a real spritesheet with canvas `drawImage` clipping instead of base64 per car. |
 
 ---
 
