@@ -2,7 +2,7 @@
 
 > **High-Speed Traffic Simulation** — dodge traffic, chain near-misses, unlock 20 cars, and chase the leaderboard.
 
-🎮 **[Play Live on GitHub Pages](#)** ← (https://miko44quliyev.github.io/mini-car-game/)*
+🎮 **[Play Live on GitHub Pages](https://miko44quliyev.github.io/mini-car-game/)**
 
 📓 **[Read the AI Diary](./AI_DIARY.md)**
 
